@@ -5,22 +5,8 @@
 #include <vector>
 
 class CGlob {
- private:
-  typedef std::vector<std::string> StringList;
-
-  std::string        pattern_;
-  std::string        compile_;
-  bool               compiled_;
-  bool               valid_;
-  bool               case_sensitive_;
-  bool               allow_save_;
-  bool               allow_or_;
-  bool               allow_non_printable_;
-  mutable int        match_start_;
-  mutable StringList match_strings_;
-
  public:
-  CGlob(const std::string &pattern);
+  CGlob(const std::string &pattern="");
 
   virtual ~CGlob();
 
@@ -66,6 +52,20 @@ class CGlob {
   void compile();
   bool compareStrings(const std::string &compile_str, const std::string &match_str) const;
   bool compareChars(char c1, char c2) const;
+
+ private:
+  typedef std::vector<std::string> StringList;
+
+  std::string        pattern_;
+  std::string        compile_;
+  bool               compiled_;
+  bool               valid_;
+  bool               case_sensitive_;
+  bool               allow_save_;
+  bool               allow_or_;
+  bool               allow_non_printable_;
+  mutable int        match_start_;
+  mutable StringList match_strings_;
 };
 
 #define CGLOB_THROW(pattern,message,pos) \

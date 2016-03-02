@@ -1,5 +1,4 @@
 #include <CGlob.h>
-
 #include <sys/types.h>
 
 #define CGLOB_MATCH_ANY     '\001'
