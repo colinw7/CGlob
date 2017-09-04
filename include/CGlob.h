@@ -6,7 +6,7 @@
 
 class CGlob {
  public:
-  CGlob(const std::string &pattern="");
+  explicit CGlob(const std::string &pattern="");
 
   virtual ~CGlob();
 
@@ -58,15 +58,17 @@ class CGlob {
 
   std::string        pattern_;
   std::string        compile_;
-  bool               compiled_;
-  bool               valid_;
-  bool               case_sensitive_;
-  bool               allow_save_;
-  bool               allow_or_;
-  bool               allow_non_printable_;
-  mutable int        match_start_;
+  bool               compiled_ { false };
+  bool               valid_ { false };
+  bool               case_sensitive_ { true };
+  bool               allow_save_ { false };
+  bool               allow_or_ { true };
+  bool               allow_non_printable_ { true };
+  mutable int        match_start_ { -1 };
   mutable StringList match_strings_;
 };
+
+//------
 
 #define CGLOB_THROW(pattern,message,pos) \
   throw CGlobError(pattern,message,pos)
@@ -80,15 +82,15 @@ namespace CGlobUtil {
 }
 
 struct CGlobError {
-  std::string pattern;
-  std::string message;
-  int         pos;
-
-  CGlobError(const std::string &pattern1, const std::string &message1, int pos1 = 0) :
+  CGlobError(const std::string &pattern1, const std::string &message1, int pos1=0) :
    pattern(pattern1), message(message1), pos(pos1) {
   }
 
   std::string format();
+
+  std::string pattern;
+  std::string message;
+  int         pos { 0 };
 };
 
 #endif

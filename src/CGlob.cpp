@@ -11,16 +11,7 @@
 
 CGlob::
 CGlob(const std::string &pattern) :
- pattern_             (pattern),
- compile_             (),
- compiled_            (false),
- valid_               (false),
- case_sensitive_      (true),
- allow_save_          (false),
- allow_or_            (true),
- allow_non_printable_ (true),
- match_start_         (-1),
- match_strings_       ()
+ pattern_(pattern)
 {
 }
 
