@@ -34,14 +34,14 @@ class CGlob {
     if (! allow_save_)
       return 0;
 
-    return match_strings_.size();
+    return int(match_strings_.size());
   }
 
   const std::string &getMatchString(int i) const {
     if (i < 0 || i >= getNumMatchStrings())
       throw "Invalid Index";
 
-    return match_strings_[i];
+    return match_strings_[size_t(i)];
   }
 
   virtual bool isValidChar(int c) const;
