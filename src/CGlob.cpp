@@ -26,9 +26,9 @@ isPattern() const
 {
   bool in_brackets = false;
 
-  int pattern_str_len = pattern_.length();
+  auto pattern_str_len = uint(pattern_.length());
 
-  for (int i = 0; i < pattern_str_len; i++) {
+  for (uint i = 0; i < pattern_str_len; i++) {
     switch (pattern_[i]) {
       case '*':
         return true;
@@ -144,9 +144,9 @@ compile()
 
   bool in_brackets = false;
 
-  int pattern_str_len = pattern_.length();
+  auto pattern_str_len = uint(pattern_.length());
 
-  for (int i = 0; i < pattern_str_len; i++) {
+  for (uint i = 0; i < pattern_str_len; i++) {
     switch (pattern_[i]) {
       case '*': {
         compile_ += CGLOB_MATCH_ANY;
@@ -173,7 +173,7 @@ compile()
 
         /* Save Start of String inside Braces */
 
-        int i1 = i;
+        auto i1 = i;
 
         /* Find Closing Brace */
 
@@ -191,18 +191,18 @@ compile()
         }
 
         if (pattern_[i] != ']') {
-          CGLOB_THROW(pattern_, "No closing square bracket", i);
+          CGLOB_THROW(pattern_, "No closing square bracket", int(i));
           valid_ = false;
         }
 
         /* Save End of String inside Braces */
 
-        int i2 = i - 1;
+        auto i2 = i - 1;
 
         /* If Empty Braces then Error */
 
         if (i1 > i2) {
-          CGLOB_THROW(pattern_, "Empty square brackets", i2);
+          CGLOB_THROW(pattern_, "Empty square brackets", int(i2));
           valid_ = false;
         }
 
@@ -217,7 +217,7 @@ compile()
            braces, this will ensure the list of characters
            stored in the compile string will be minimised. */
 
-        for (int k = i1; k <= i2; k++) {
+        for (uint k = i1; k <= i2; k++) {
           /* Check for escaped character */
 
           if      (pattern_[k] == '\\') {
@@ -225,11 +225,11 @@ compile()
               k++;
 
             if (! isValidChar(pattern_[k])) {
-              CGLOB_THROW(pattern_, "Invalid character", k);
+              CGLOB_THROW(pattern_, "Invalid character", int(k));
               valid_ = false;
             }
 
-            unsigned int c = pattern_[k];
+            auto c = static_cast<unsigned int>(pattern_[k]);
 
             cflags[c] = true;
           }
@@ -245,7 +245,7 @@ compile()
             /* Ensure End is greater than Start */
 
             if (start_char >= end_char) {
-              CGLOB_THROW(pattern_, "Range out of order", k);
+              CGLOB_THROW(pattern_, "Range out of order", int(k));
               valid_ = false;
             }
 
@@ -265,11 +265,11 @@ compile()
 
           else {
             if (! isValidChar(pattern_[k])) {
-              CGLOB_THROW(pattern_, "Invalid character", k);
+              CGLOB_THROW(pattern_, "Invalid character", int(k));
               valid_ = false;
             }
 
-            unsigned int c = pattern_[k];
+            auto c = static_cast<unsigned int>(pattern_[k]);
 
             cflags[c] = true;
           }
@@ -286,19 +286,19 @@ compile()
         /* Add match type, number of characters and characters
            to compile string */
 
-        compile_ += type;
-        compile_ += (char) num_chars;
+        compile_ += char(type);
+        compile_ += char(num_chars);
 
         for (int k = 0; k < 256; k++)
           if (cflags[k])
-            compile_ += (char) k;
+            compile_ += char(k);
 
         break;
       }
       case '|': {
         if (allow_or_) {
           if (i == 0) {
-            CGLOB_THROW(pattern_, "Invalid Or", i);
+            CGLOB_THROW(pattern_, "Invalid Or", int(i));
             valid_ = false;
           }
 
@@ -312,7 +312,7 @@ compile()
       case '(': {
         if (allow_save_) {
           if (in_brackets) {
-            CGLOB_THROW(pattern_, "Invalid bracket nesting", i);
+            CGLOB_THROW(pattern_, "Invalid bracket nesting", int(i));
             valid_ = false;
           }
 
@@ -328,7 +328,7 @@ compile()
       case ')': {
         if (allow_save_) {
           if (! in_brackets) {
-            CGLOB_THROW(pattern_, "Invalid bracket nesting", i);
+            CGLOB_THROW(pattern_, "Invalid bracket nesting", int(i));
             valid_ = false;
           }
 
@@ -346,7 +346,7 @@ compile()
           i++;
 
         if (! isValidChar(pattern_[i])) {
-          CGLOB_THROW(pattern_, "Invalid character", i);
+          CGLOB_THROW(pattern_, "Invalid character", int(i));
           valid_ = false;
         }
 
@@ -356,7 +356,7 @@ compile()
       }
       default: {
         if (! isValidChar(pattern_[i])) {
-          CGLOB_THROW(pattern_, "Invalid character", i);
+          CGLOB_THROW(pattern_, "Invalid character", int(i));
           valid_ = false;
         }
 
@@ -397,11 +397,11 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
     }
   }
 
-  int i = 0;
-  int j = 0;
+  uint i = 0;
+  uint j = 0;
 
-  int compile_str_len = compile_str.length();
-  int match_str_len   = match_str  .length();
+  auto compile_str_len = uint(compile_str.length());
+  auto match_str_len   = uint(match_str  .length());
 
   while (i < compile_str_len) {
     switch (compile_str[i]) {
@@ -439,9 +439,9 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
 
           if (i >= compile_str_len) {
             if (match_start_ >= 0) {
-              CGlob *th = const_cast<CGlob *>(this);
+              auto *th = const_cast<CGlob *>(this);
 
-              std::string match_string = match_str.substr(match_start_);
+              std::string match_string = match_str.substr(uint(match_start_));
 
               th->match_strings_.push_back(match_string);
             }
@@ -452,9 +452,9 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
           /* Check rest of Pattern against any terminating
              sub-string of the Check String for Match */
 
-          int length = match_str.length() - j;
+          auto length = uint(match_str.length() - j);
 
-          for (int k = 0; k < length; k++) {
+          for (uint k = 0; k < length; k++) {
             StringList savematch_strings = match_strings_;
 
             CGlob *th = const_cast<CGlob *>(this);
@@ -507,9 +507,9 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
           /* Check rest of Pattern against any terminating
              sub-string of the Check String for Match */
 
-          int length = match_str.length() - j;
+          auto length = uint(match_str.length() - j);
 
-          for (int k = 0; k < length; k++)
+          for (uint k = 0; k < length; k++)
             if (compareStrings(compile_str.substr(i), match_str.substr(j + k)))
               return true;
 
@@ -547,11 +547,11 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
 
         /* Get and Skip Number of Characters to Check Against */
 
-        int num_chars = compile_str[i++];
+        auto num_chars = uint(compile_str[i++]);
 
         /* Check Each Character for Match */
 
-        int k;
+        uint k;
 
         for (k = 0; k < num_chars; k++)
           if (compareChars(match_str[j], compile_str[i + k]))
@@ -579,7 +579,7 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
         if (allow_save_) {
           CGlob *th = const_cast<CGlob *>(this);
 
-          th->match_start_ = j;
+          th->match_start_ = int(j);
 
           i++;
         }
@@ -596,7 +596,7 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
       }
       case CGLOB_MATCH_END: {
         if (allow_save_) {
-          std::string match_string = match_str.substr(match_start_, j - match_start_);
+          auto match_string = match_str.substr(uint(match_start_), uint(int(j) - match_start_));
 
           CGlob *th = const_cast<CGlob *>(this);
 
@@ -656,10 +656,10 @@ compareChars(char c1, char c2) const
 {
   if (! case_sensitive_) {
     if (isupper(c1))
-      c1 = tolower(c1);
+      c1 = char(tolower(c1));
 
     if (isupper(c2))
-      c2 = tolower(c2);
+      c2 = char(tolower(c2));
   }
 
   return (c1 == c2);
@@ -688,14 +688,14 @@ std::string
 CGlobError::
 format()
 {
-  std::string fmt_message = message + " : " + pattern.substr(0, pos);
+  std::string fmt_message = message + " : " + pattern.substr(0, uint(pos));
 
-  fmt_message += ">" + pattern.substr(pos, 1) + "<";
+  fmt_message += ">" + pattern.substr(uint(pos), 1) + "<";
 
-  int len = pattern.length();
+  auto len = uint(pattern.length());
 
-  if (pos < len - 1)
-    fmt_message += pattern.substr(pos + 1);
+  if (pos < int(len - 1))
+    fmt_message += pattern.substr(uint(pos + 1));
 
   return fmt_message;
 }
@@ -723,11 +723,11 @@ parse(const std::string &str, const std::string &pattern, StringList &match_strs
   if (! glob.compare(str))
     return false;
 
-  uint num = glob.getNumMatchStrings();
+  auto num = glob.getNumMatchStrings();
 
   match_strs.clear();
 
-  for (uint i = 0; i < num; ++i)
+  for (int i = 0; i < num; ++i)
     match_strs.push_back(glob.getMatchString(i));
 
   return true;
