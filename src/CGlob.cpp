@@ -470,13 +470,11 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
               if (! match_end) {
                 std::string match_string = match_str.substr(j, k);
 
-                StringList::iterator p;
-
-                for (p = match_strings_.begin(); p != match_strings_.end(); ++p)
+                for (auto p = match_strings_.begin(); p != match_strings_.end(); ++p)
                   savematch_strings.push_back(match_string + (*p));
               }
               else {
-                std::string match_string = match_str.substr(j, k);
+                auto match_string = match_str.substr(j, k);
 
                 savematch_strings.push_back(match_string);
               }
