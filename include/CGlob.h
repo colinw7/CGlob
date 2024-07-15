@@ -18,20 +18,29 @@ class CGlob {
 
   const std::string &getPattern() const { return pattern_; }
 
-  void setCaseSensitive(bool flag) { case_sensitive_ = flag; }
-  bool getCaseSensitive() const { return case_sensitive_; }
+  //---
 
-  void setAllowSave(bool flag) { allow_save_ = flag; }
-  bool getAllowSave() const { return allow_save_; }
+  // options
 
-  void setAllowOr(bool flag) { allow_or_ = flag; }
-  bool getAllowOr() const { return allow_or_; }
+  void setCaseSensitive(bool flag) { options_.case_sensitive = flag; }
+  bool getCaseSensitive() const { return options_.case_sensitive; }
 
-  void setAllowNonPrintable(bool flag) { allow_non_printable_ = flag; }
-  bool getAllowNonPrintable() const { return allow_non_printable_; }
+  void setAllowSave(bool flag) { options_.allow_save = flag; }
+  bool getAllowSave() const { return options_.allow_save; }
+
+  void setAllowOr(bool flag) { options_.allow_or = flag; }
+  bool getAllowOr() const { return options_.allow_or; }
+
+  void setAllowNonPrintable(bool flag) { options_.allow_non_printable = flag; }
+  bool getAllowNonPrintable() const { return options_.allow_non_printable; }
+
+  void setAllowEscape(bool flag) { options_.allow_escape = flag; }
+  bool getAllowEscape() const { return options_.allow_escape; }
+
+  //---
 
   int getNumMatchStrings() const {
-    if (! allow_save_)
+    if (! getAllowSave())
       return 0;
 
     return int(match_strings_.size());
@@ -54,16 +63,28 @@ class CGlob {
   bool compareChars(char c1, char c2) const;
 
  private:
-  typedef std::vector<std::string> StringList;
+  using StringList = std::vector<std::string>;
 
-  std::string        pattern_;
-  std::string        compile_;
-  bool               compiled_ { false };
-  bool               valid_ { false };
-  bool               case_sensitive_ { true };
-  bool               allow_save_ { false };
-  bool               allow_or_ { true };
-  bool               allow_non_printable_ { true };
+  struct OptionsData {
+    bool case_sensitive      { true };
+    bool allow_save          { false };
+    bool allow_or            { true };
+    bool allow_non_printable { true };
+    bool allow_escape        { true };
+  };
+
+  // pattern
+  std::string pattern_;
+
+  // compile state
+  std::string compile_;
+  bool        compiled_ { false };
+  bool        valid_ { false };
+
+  // options
+  OptionsData options_;
+
+  // match
   mutable int        match_start_ { -1 };
   mutable StringList match_strings_;
 };
@@ -74,7 +95,7 @@ class CGlob {
   throw CGlobError(pattern,message,pos)
 
 namespace CGlobUtil {
-  typedef std::vector<std::string> StringList;
+  using StringList = std::vector<std::string>;
 
   bool parse(const std::string &str, const std::string &pattern);
 

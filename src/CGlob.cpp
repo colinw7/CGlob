@@ -40,7 +40,7 @@ isPattern() const
         /* Find Closing Brace */
 
         while (i < pattern_str_len) {
-          if      (pattern_[i] == '\\') {
+          if      (pattern_[i] == '\\' && getAllowEscape()) {
             i++;
 
             if (i < pattern_str_len)
@@ -58,7 +58,7 @@ isPattern() const
         return true;
       }
       case '|': {
-        if (allow_or_) {
+        if (getAllowOr()) {
           if (i == 0)
             return false;
 
@@ -68,7 +68,7 @@ isPattern() const
         break;
       }
       case '(': {
-        if (allow_save_) {
+        if (getAllowSave()) {
           if (in_brackets)
             return false;
 
@@ -78,7 +78,7 @@ isPattern() const
         break;
       }
       case ')': {
-        if (allow_save_) {
+        if (getAllowSave()) {
           if (! in_brackets)
             return false;
 
@@ -90,8 +90,10 @@ isPattern() const
         break;
       }
       case '\\': {
-        if (i < pattern_str_len - 1)
-          i++;
+        if (getAllowEscape()) {
+          if (i < pattern_str_len - 1)
+            i++;
+        }
 
         break;
       }
@@ -178,7 +180,7 @@ compile()
         /* Find Closing Brace */
 
         while (i < pattern_str_len) {
-          if      (pattern_[i] == '\\') {
+          if      (pattern_[i] == '\\' && getAllowEscape()) {
             i++;
 
             if (i < pattern_str_len)
@@ -220,7 +222,7 @@ compile()
         for (uint k = i1; k <= i2; k++) {
           /* Check for escaped character */
 
-          if      (pattern_[k] == '\\') {
+          if      (pattern_[k] == '\\' && getAllowEscape()) {
             if (k <= i2 - 1)
               k++;
 
@@ -296,7 +298,7 @@ compile()
         break;
       }
       case '|': {
-        if (allow_or_) {
+        if (getAllowOr()) {
           if (i == 0) {
             CGLOB_THROW(pattern_, "Invalid Or", int(i));
             valid_ = false;
@@ -310,7 +312,7 @@ compile()
         break;
       }
       case '(': {
-        if (allow_save_) {
+        if (getAllowSave()) {
           if (in_brackets) {
             CGLOB_THROW(pattern_, "Invalid bracket nesting", int(i));
             valid_ = false;
@@ -326,7 +328,7 @@ compile()
         break;
       }
       case ')': {
-        if (allow_save_) {
+        if (getAllowSave()) {
           if (! in_brackets) {
             CGLOB_THROW(pattern_, "Invalid bracket nesting", int(i));
             valid_ = false;
@@ -342,8 +344,10 @@ compile()
         break;
       }
       case '\\': {
-        if (i < pattern_str_len - 1)
-          i++;
+        if (getAllowEscape()) {
+          if (i < pattern_str_len - 1)
+            i++;
+        }
 
         if (! isValidChar(pattern_[i])) {
           CGLOB_THROW(pattern_, "Invalid character", int(i));
@@ -367,7 +371,7 @@ compile()
     }
   }
 
-  if (allow_save_) {
+  if (getAllowSave()) {
     if (in_brackets)
       compile_ += CGLOB_MATCH_END;
   }
@@ -379,7 +383,7 @@ bool
 CGlob::
 compareStrings(const std::string &compile_str, const std::string &match_str) const
 {
-  if (allow_or_) {
+  if (getAllowOr()) {
     std::string::size_type pos = compile_str.find(CGLOB_MATCH_OR);
 
     if (pos != std::string::npos) {
@@ -408,7 +412,7 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
       case CGLOB_MATCH_ANY: {
         i++;
 
-        if (allow_save_) {
+        if (getAllowSave()) {
           /* Compress multiple *'s into one */
 
           bool match_end = false;
@@ -574,7 +578,7 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
         break;
       }
       case CGLOB_MATCH_START: {
-        if (allow_save_) {
+        if (getAllowSave()) {
           CGlob *th = const_cast<CGlob *>(this);
 
           th->match_start_ = int(j);
@@ -593,7 +597,7 @@ compareStrings(const std::string &compile_str, const std::string &match_str) con
         break;
       }
       case CGLOB_MATCH_END: {
-        if (allow_save_) {
+        if (getAllowSave()) {
           auto match_string = match_str.substr(uint(match_start_), uint(int(j) - match_start_));
 
           CGlob *th = const_cast<CGlob *>(this);
@@ -652,7 +656,7 @@ bool
 CGlob::
 compareChars(char c1, char c2) const
 {
-  if (! case_sensitive_) {
+  if (! getCaseSensitive()) {
     if (isupper(c1))
       c1 = char(tolower(c1));
 
@@ -667,7 +671,7 @@ bool
 CGlob::
 isValidChar(int c) const
 {
-  if (! allow_non_printable_ && ! isprint(c))
+  if (! getAllowNonPrintable() && ! isprint(c))
     return false;
 
   return true;
